@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user facility and name information.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "User's full name" },
+        "facility": { "type": "string", "description": "Medical facility name" },
+        "role": { "type": "string", "enum": ["staff", "admin"], "description": "User role" }
+      },
+      "required": ["name", "facility"]
+    },
+    "Referral": {
+      "title": "Health Referral",
+      "description": "A medical referral record.",
+      "type": "object",
+      "properties": {
+        "patientName": { "type": "string" },
+        "age": { "type": "number" },
+        "sex": { "type": "string", "enum": ["Male", "Female"] },
+        "reasonForReferral": { "type": "string" },
+        "diagnosis": { "type": "string" },
+        "treatmentGiven": { "type": "string" },
+        "destination": { "type": "string" },
+        "urgency": { "type": "string", "enum": ["Emergency", "Urgent", "Routine"] },
+        "fromFacility": { "type": "string" },
+        "referredBy": { "type": "string" },
+        "referredByUid": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["patientName", "destination", "urgency", "fromFacility", "referredBy", "referredByUid"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User private data"
+    },
+    "/referrals/{referralId}": {
+      "schema": "Referral",
+      "description": "Global referrals list"
+    },
+    "/admins/{userId}": {
+      "schema": {
+        "title": "Admin Record",
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" }
+        }
+      },
+      "description": "Admin identity records"
+    }
+  }
+}

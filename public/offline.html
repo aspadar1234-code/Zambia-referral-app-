@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zambia Referral Pro+ | Offline</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-6">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl shadow-blue-100 p-8 text-center border border-slate-100">
+        <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path><path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+        </div>
+        
+        <h1 class="text-2xl font-black text-slate-900 mb-2">You're Offline</h1>
+        <p class="text-slate-500 text-sm mb-8">It looks like your internet connection is unavailable. Zambia Referral Pro+ can still work offline once cached, but the current page hasn't loaded properly.</p>
+        
+        <div class="space-y-3">
+            <button onclick="window.location.reload()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-700 shadow-lg shadow-blue-100 transition active:scale-95">
+                TRY RECONNECTING
+            </button>
+            <a href="/" class="block w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm hover:bg-slate-200 transition">
+                GO TO DASHBOARD
+            </a>
+        </div>
+        
+        <div class="mt-8 pt-8 border-t border-slate-50">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Emergency Services</p>
+            <p class="text-xs text-slate-500 mt-1">If this is a critical medical emergency, please use local emergency channels immediately.</p>
+        </div>
+    </div>
+</body>
+</html>

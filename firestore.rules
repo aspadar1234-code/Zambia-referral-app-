@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email in [
+          "aspadar1234@gmail.com",
+          "mulengapaul575@gmail.com",
+          "admin@zambiahealth.local"
+        ]
+      );
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['name', 'facility', 'province', 'district']) &&
+               data.keys().size() >= 4 && data.keys().size() <= 6 &&
+               data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+               data.facility is string && data.facility.size() > 0 && data.facility.size() <= 100 &&
+               data.province is string && data.province.size() > 0 && data.province.size() <= 50 &&
+               data.district is string && data.district.size() > 0 && data.district.size() <= 50 &&
+               (!('role' in data) || data.role in ['staff', 'admin']);
+      }
+
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      
+      allow create: if isSignedIn() && request.auth.uid == userId && 
+                    isValidUser(incoming()) && 
+                    (!('role' in incoming()) || incoming().role == 'staff' || isAdmin());
+                    
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin()) &&
+                    isValidUser(incoming()) &&
+                    (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'facility', 'province', 'district', 'role'])) &&
+                    (incoming().role == existing().role || isAdmin());
+
+      allow delete: if isAdmin();
+    }
+
+    // --- Referrals Collection ---
+    match /referrals/{referralId} {
+      function isValidReferral(data) {
+        return data.keys().hasAll(['patientName', 'age', 'sex', 'reasonForReferral', 'diagnosis', 'treatmentGiven', 'destination', 'urgency', 'fromFacility', 'referredBy', 'referredByUid', 'timestamp']) &&
+               data.patientName is string && data.patientName.size() > 0 && data.patientName.size() <= 100 &&
+               data.age is number && data.age >= 0 && data.age <= 150 &&
+               data.sex in ['Male', 'Female'] &&
+               (!('smartCareId' in data) || data.smartCareId == null || (data.smartCareId is string && data.smartCareId.size() <= 100)) &&
+               data.reasonForReferral is string && data.reasonForReferral.size() > 0 && data.reasonForReferral.size() <= 2000 &&
+               data.diagnosis is string && data.diagnosis.size() > 0 && data.diagnosis.size() <= 2000 &&
+               data.treatmentGiven is string && data.treatmentGiven.size() > 0 && data.treatmentGiven.size() <= 2000 &&
+               data.destination is string && data.destination.size() > 0 && data.destination.size() <= 100 &&
+               data.urgency in ['Emergency', 'Urgent', 'Routine'] &&
+               data.fromFacility is string && data.fromFacility.size() > 0 && data.fromFacility.size() <= 100 &&
+               data.referredBy is string && data.referredBy.size() > 0 && data.referredBy.size() <= 100 &&
+               data.referredByUid == request.auth.uid &&
+               data.timestamp == request.time;
+      }
+
+      allow read: if isSignedIn();
+      
+      allow create: if isVerified() && isValidId(referralId) && isValidReferral(incoming());
+      
+      allow update: if isVerified() && (incoming().referredByUid == request.auth.uid || isAdmin()) &&
+                    (
+                      // Action: Update Outcome
+                      (incoming().diff(existing()).affectedKeys().hasOnly(['outcome']) && 
+                       incoming().outcome is string && incoming().outcome.size() <= 1000)
+                    );
+      
+      allow delete: if isAdmin();
+    }
+
+    // --- Admins Collection (System logic) ---
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Only manageable via console or specialized tool
+    }
+
+    // --- Compatibility & System ---
+    match /test/connection {
+      allow read: if isSignedIn();
+    }
+
+    match /system/config {
+      allow read: if true;
+      allow update: if isAdmin();
+    }
+  }
+}
